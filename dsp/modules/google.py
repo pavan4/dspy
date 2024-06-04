@@ -1,8 +1,10 @@
 import os
 from collections.abc import Iterable
 from typing import Any, Optional
+from urllib.request import urlopen
 
 import backoff
+from PIL import Image
 
 from dsp.modules.lm import LM
 
@@ -88,9 +90,9 @@ class Google(LM):
         kwargs = {
             "candidate_count": 1,
             "temperature": 0.0 if "temperature" not in kwargs else kwargs["temperature"],
-            "max_output_tokens": 2048,
-            "top_p": 1,
-            "top_k": 1,
+            "max_output_tokens": 2048 if "max_output_tokens" not in kwargs else kwargs["max_output_tokens"],
+            "top_p": 1 if "top_p" not in kwargs else kwargs["top_p"],
+            "top_k": 1 if "top_k" not in kwargs else kwargs["top_k"],
             **kwargs,
         }
 
@@ -117,8 +119,12 @@ class Google(LM):
         n = kwargs.pop("n", None)
         if n is not None and n > 1 and kwargs['temperature'] == 0.0:
             kwargs['temperature'] = 0.7
-
-        response = self.llm.generate_content(prompt, generation_config=kwargs)
+        if "image" in kwargs:
+            img_url = kwargs.pop("image", None)
+            image = Image.open(urlopen(img_url))
+            response = self.llm.generate_content([prompt, image], generation_config=kwargs)
+        else:
+            response = self.llm.generate_content(prompt, generation_config=kwargs)
 
         history = {
             "prompt": prompt,

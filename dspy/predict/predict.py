@@ -98,7 +98,7 @@ class Predict(Parameter):
 
         # Switch to legacy format for dsp.generate
         template = signature_to_template(signature)
-
+        config["image"] = kwargs.pop("image")
         if self.lm is None:
             x, C = dsp.generate(template, **config)(x, stage=self.stage)
         else:

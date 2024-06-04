@@ -54,7 +54,6 @@ class Template(TemplateV2):
     # equality
     def __eq__(self, other):
         if set(self.kwargs.keys()) != set(other.kwargs.keys()):
-            print('here2')
             return False
 
         for k in self.kwargs.keys():
